@@ -1,0 +1,166 @@
+<!-- TODO: license this! -->
+<!--#include virtual="pre.html" -->
+<title>iank.org - A Hardware Random Number Generator</title>
+<!--#include virtual="pre2.html" -->
+
+<div class="header">
+<h1>Hardware Random Number Generator</h1>
+<div class="byline">Posted June 6, 2014 by Ian Kilgore</div>
+</div>
+
+<p>This page describes the implementation of (Yet Another) avalanche noise hardware random number generator. This is a device which has been implemented many times [e.g. <a href="http://robseward.com/itp/adv_tech/random_generator/">Rob Seward</a>, <a href="http://www.cryogenius.com/hardware/isarng/">Aaron Logue</a>], including some commercial offerings [e.g. <a href="http://www.entropykey.co.uk/">Entropy Key</a>, <a href="http://ubld.it/products/truerng-hardware-random-number-generator/">TrueRNG</a>]. The goal of this project is not to build something novel or exceed existing specifications. This is an exercise in designing a device beyond the prototype.</p>
+
+<p>Many hobby projects are described affectionately as "hacks" and typically exist at varying levels of technological sophistication, but are typically characterized by low-cost, rapid, jury-rigged design. This is not a value judgment; it is often well-worth stopping at the prototype stage. That's the fun part. The rest is <a href="http://www.johndcook.com/blog/2011/11/15/plumber-programmers/">plumbing</a> and, especially in software development, is often the time-consuming, repetitive, and boring part. Still, I thought I should learn some plumbing. My goal was to implement the hack (the first eighty percent), and incrementally improve it into a faster, cleaner, and more compact design (the second and third eighty percents).</p>
+
+<p>A very brief overview of the physics (it is covered adequately elsewhere) is followed by a description of the prototype and my experience with each successive iteration, ending with a note about equipment and a conclusion.</p>
+
+<h2>Theory</h2>
+
+<p>The need for true random sources is motivated in an overwhelming body of research which reveals systematic human bias when generating or interpreting random data ([<a id="note1" /><a href="#ref1">1</a>], [<a id="note2" /><a href="#ref2">2</a>], and [<a id="note3" /><a href="#ref3">3</a>] are filled with anecdotes and references). Moreover, deterministic psuedo-random algorithms are unsuitable for high-volume or high-security applications such as lotteries [<a id="note4" /><a href="#ref4">4</a>] and gaming [<a id="note5" /><a href="#ref5">5</a>], or cryptography.</p>
+
+<p>Random physical sources such as quantum effects (e.g. the action of a photon incident upon a beam splitter), or chaotic systems (e.g. weather) are sampled and <a href="http://en.wikipedia.org/wiki/Hardware_random_number_generator#Software_whitening">conditioned</a> and are thought to provide truly random<sup><a id="foot1" /><a href="#fnh1">1</a></sup>) streams.</p>
+
+<p>This paper describes a True Random Number Generator (TRNG) based on avalanche breakdown noise in a <a href="http://en.wikipedia.org/wiki/P%E2%80%93n_junction">PN junction</a>. A PN junction is a semiconductor structure which forms a diode, allowing (ideally) electric current to flow in only one direction. Electric fields internal to the structure support a potential gradient allowing current to flow easily in one direction but creating a potential barrier for electrons driven in the reverse direction.</p>
+
+<p>If strongly reverse-biased, however, electrons which overcome that potential barrier can have sufficient energy to cause <b>impact ionization</b>, leading to a multiplication effect [<a id="note7" /><a href="#ref7">7</a>]. An energetic electron impacting a silicon atom in the lattice can knock another electron out of the valence band (forming another electron-hole pair). In the presence of a strong reverse-biased electric field (needed to initiate this process in the first place), the liberated electron will accelerate and the process can continue, creating something like a sustained chain reaction.</p>
+
+<p>Laying aside quantum effects and considering electrons in our PN junction to act as a Newtonian gas<sup><a id="foot2" /><a href="#fnh2">2</a></sup>, avalanche breakdown is formally a <a href="http://en.wikipedia.org/wiki/Chaos_theory">chaotic</a> process: It depends upon strongly nonlinear interactions between a large number of elements<sup><a id="foot3" /><a href="#fnh3">3</a></sup> and exhibits topological mixing (the charge carriers mix throughout the structure and effects are not localized). Chaos means that this system, even if theoretically deterministic (I believe it is not), is highly sensitive to a tremendously large and unknowable set of initial conditions, rendering it unpredictable.</p>
+
+<h2>Prototype</h2>
+<p>The prototype is based upon a design by <a href="http://web.jfet.org/hw-rng.html">Will Ware</a>. The physical random source is a reverse-biased PN junction (actually two terminals of a <a href="http://en.wikipedia.org/wiki/Bipolar_junction_transistor">bipolar junction transistor</a>). Part of a transistor is used, rather than a diode, because diodes are typically designed with either very high breakdown voltage (as in the case of rectifying diodes) or low breakdown voltages but with minimal avalanche noise (e.g. zener diodes which are meant to be used in breakdown). A schematic is shown below (click to enlarge).</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="trng/trng_sch.png" data-lightbox="sc-1" title="Prototype schematic, after Will Ware's design"><img class="example-image" src="trng/trng_sch_t.png" data-caption="Prototype schematic, after Will Ware's design"></img></a>
+</div>
+
+<p>The PN junction formed by the base and emitter of $T_1$ is reverse-biased by an 18V source (realized by two 9V batteries). The collector is left floating. The output is amplified by common-emitter amplifier $T_3$ and DC coupled through $C_1$ to another common-emitter stage ($T_2$).</p>
+
+<p>I constructed this prototype on perfboard and sampled the output using the ADC on-board an <a href="http://arduino.cc/en/Main/arduinoBoardUno">Arduino Uno</a>. After correcting the output <a href="http://en.wikipedia.org/wiki/Probability_distribution">distribution</a> using <a href="http://en.wikipedia.org/wiki/Hardware_random_number_generator#Software_whitening">Von Neumann's algorithm</a>, the effective data rate was around 1000 random bits per second, and the device passed the <a href="http://stat.fsu.edu/pub/diehard/">diehard</a> suite of statistical tests.</p>
+
+<p>With a working prototype, I set out to create an integrated PCB, increase the data rate, and add a USB interface (eliminating the Arduino interface)</p>
+
+<h2>Iteration 1: PCB 1, power supply</h2>
+
+<p>The first iteration adds an 18V supply based on the Texas Instruments TPS61040 DC/DC boost converter designed for LCD and LED display lighting applications. The <a href="http://www.ti.com/lit/ds/slvs413f/slvs413f.pdf">datasheet</a> contains a reference design (Figure 16, pg. 14) for an 18V output from a 5V supply. This eliminates the (bulky, variable) 9V batteries and allows the design to be powered from USB.</p>
+
+<p>A PCB was created (using the free version of <a href="http://www.cadsoftusa.com/">CadSoft EAGLE<sup>&reg;</sup></a>) containing the power supply, physics package, and amplifiers. I used surface mount technology (using <a href="http://wiki.xtronics.com/index.php/SMT_Case_Size_Codes">0603</a> passives) and replaced the through-hole 2N3904 transistor from the prototype with the MMBT3904, a surface-mounted equivalent.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="trng/trng1_sch.png" data-lightbox="sc-2" title="Schematic for PCB 1"><img class="example-image" data-caption="Schematic for PCB 1" src="trng/trng1_sch_t.png"></img></a>
+    <a class="example-image-link" href="trng/trng1_brd.png" data-lightbox="sc-2" title="Board layout for PCB 1"><img class="example-image" data-caption="Board layout for PCB 1" src="trng/trng1_brd_t.png"></img></a>
+    <a class="example-image-link" href="trng/pcb1_1.png" data-lightbox="sc-2" title="PCB 1"><img class="example-image" data-caption="PCB 1" src="trng/pcb1_1_t.png"></img></a>
+    <a class="example-image-link" href="trng/pcb1_2.png" data-lightbox="sc-2" title="PCB 1, assembled"><img class="example-image" data-caption="PCB 1, assembled" src="trng/pcb1_2_t.png"></img></a>
+</div>
+
+<p>The PCB, shown above, was manufactured by <a href="https://www.seeedstudio.com/service/">Seeed Studio Fusion</a>, a low-cost<sup><a id="foot4" /><a href="#fnh4">4</a></sup> PCB service. It was assembled and tested with the Arduino, with favourable results.</p>
+
+<h2>Iteration 2: PCB 2, ADC and LPC1343</h2>
+
+<p>Next, I needed a faster interface. After some research I chose to use the <a href="http://www.nxp.com/documents/data_sheet/LPC1311_13_42_43.pdf">LPC1343</a>, a 32-bit ARM Cortex-M3 microprocessor which has a native USB interface and runs at up to 72 MHz. Olimex offers a <a href="https://www.olimex.com/Products/ARM/NXP/LPC-P1343/">LPC1343 dev board</a> with published schematics. Using the LPC1343's on-board ADC, I was able to get about a 40x speedup over the Arduino.</p>
+
+<p>I adapted reference USB mass storage code for the LPC1343 and created a virtual mass storage interface for the device (this is not ideal). When inserted, the TRNG enumerates as a mass storage device (e.g. a USB thumbdrive) of arbitrary capacity. It would appear to, e.g. Linux, as a block device. Writes do nothing and return success. Reads return blocks of random data sampled from the noise circuit.</p>
+
+<p>Next, I found the <a href="http://www.intersil.com/content/intersil/en/products/data-converters/high-speed-a-d-converters/a-d-converters/HI5767.html">Intersil HI5767/2CBZ</a>, a fast (up to 20 megasamples per second) dedicated 10-bit ADC in a <a href="http://en.wikipedia.org/wiki/Small_Outline_Integrated_Circuit">SOIC-28</a> package. Driving the ADC at the LPC1343's clock frequency (12 MHz) led to an overall speedup of 400x vs the prototype.</p>
+
+<p>I created a SSOIC-28 breakout board using a <a href="http://www.adafruit.com/products/1208">PCB from Adafruit</a> and built a test circuit for the ADC on perfboard (pictured below), following a reference schematic in the <a href="http://www.intersil.com/content/dam/Intersil/documents/hi57/hi5767.pdf">HI5767 datasheet</a> (Figure 19, pg. 13).</p>
+
+<p>The HI5767 has an input dynamic range of no more than 1Vp-p, and I found that removing the second amplifier from the amplifier chain in my physics package reduced the output to within this level. I was able to hack the PCB (pictured below) to achieve this, saving me considerable time.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="trng/adc_test.png" data-lightbox="sc-3" title="ADC test rig"><img class="example-image" data-caption="ADC test rig" src="trng/adc_test_t.png"></img></a>
+    <a class="example-image-link" href="trng/pcb1_hack.png" data-lightbox="sc-3" title="PCB 1 hacked to bypass second amplifier"><img class="example-image" data-caption="PCB 1 hacked to bypass second amplifier" src="trng/pcb1_hack_t.png"></img></a>
+</div>
+
+<p>The test setup, shown below, consists of the Arduino Uno (now providing only a 5V power supply!), the LPC1343 (providing a USB interface), The physics package PCB #1 from above (hacked for 1V output), and my ADC test circuit. It is a mess.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="trng/mess1.png" data-lightbox="sc-4" title="Test setup"><img class="example-image" data-caption="Test setup" src="trng/mess1_t.png"></img></a>
+    <a class="example-image-link" href="trng/mess2.png" data-lightbox="sc-4" title="This is becoming unmanagable"><img class="example-image" data-caption="This is becoming unmanagable" src="trng/mess2_t.png"></img></a>
+</div>
+
+<h2>Iteration 3: Integration</h2>
+
+<p>Finally, I created a single integrated PCB. I am not an expert, but I attempted to follow some basic rules of mixed-signal design (single sided PCB with large ground pour on reverse, isolating analog and digital circuitry, short clock traces, etc) to avoid contaminating the analog noise source with radiated <a href="http://mathworld.wolfram.com/FourierSeriesSquareWave.html">high-frequency components</a> of the clock or digital outputs. It seems ironic to take measures to protect a noise signal from interference, but we must avoid introducing predictable patterns.</p>
+
+<p>The final schematic, board layout, and images of the completed device are shown below. A <a href="/trng/trng3.pdf">PDF copy of the schematic</a> is also available. The final device, after moving the whitening logic to firmware (for completeness sake, but at a significant speed expense), achieved 9 kB/sec random data.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="trng/final_sch.png" data-lightbox="sc-5" title="Final schematic"><img class="example-image" data-caption="Final schematic" src="trng/final_sch_t.png"></img></a>
+    <a class="example-image-link" href="trng/final_brd.png" data-lightbox="sc-5" title="Final board layout"><img class="example-image" data-caption="Final board layout" src="trng/final_brd_t.png"></img></a>
+    <a class="example-image-link" href="trng/final_assembled.png" data-lightbox="sc-5" title="Assembled device"><img class="example-image" data-caption="Assembled device" src="trng/final_assembled_t.png"></img></a>
+    <a class="example-image-link" href="trng/final_assembled2.png" data-lightbox="sc-5" title="Assembled device"><img class="example-image" data-caption="Assembled device" src="trng/final_assembled2_t.png"></img></a>
+</div>
+
+<h2>Tools</h2>
+
+I used a <a href="https://www.sparkfun.com/products/10707">temperature-controlled soldering station</a>, a <a href="https://www.sparkfun.com/products/10706">hot air rework station</a>, and a <a href="http://www.amscope.com/sm-4tz-frl-mb.html">boom-mounted stereo inspection microscope</a> (on a low magnification) to assemble and inspect the device, particularly the LPC1343's LQFP48 package. These tools are relatively expensive for the hobbyist (although I have by no means gone to extremes), but are well worth it as they eliminate a significant <a href="http://en.wikipedia.org/wiki/Opportunity_cost">opportunity cost</a> of time, frustration, and damaged parts.
+
+<div class="image-row">
+    <a class="example-image-link" href="trng/bench1.png" data-lightbox="sc-6" title="Lab bench"><img class="example-image" data-caption="Lab bench" src="trng/bench1_t.png"></img></a>
+    <a class="example-image-link" href="trng/bench2.png" data-lightbox="sc-6" title="Soldering equipment"><img class="example-image" data-caption="Soldering equipment" src="trng/bench2_t.png"></img></a>
+</div>
+
+<h2>Conclusion</h2>
+
+<p>This design, like many others in its class (including some commercial offerings) is flawed and should not be used by anyone. It is not a differential design and is easily influenced by external fields. Unlike some commercial products, it has no <a href="http://www.entropykey.co.uk/tech/">tampering detection</a> or countermeasures, leaving it vulnerable to manipulation.</p>
+
+<p>I am done iterating and there are loose ends I do not intend to clean up. In particular, the USB mass storage interface, while fast, is idiosyncratic and should be replaced by a more suitable type, perhaps USB CDC (?). The board size could be significantly reduced by using 0402 or smaller passives, decreasing spacing between components, and using a 4-layered board. Finally, the whitening logic could be done by a CPLD rather than in firmware, leading to a significant speedup and possibly the elimination of the microcontroller in favour of a specialized USB implementation.</p>
+
+<p>This was for me an interesting exercise in attempting to create a polished product in an amateur setting using amateur tools, techniques, and an amateur mind. I have no doubt that my inexperience led me to make several and important naïve mistakes, but I am satisfied with the result. I hope that I will not be satisfied with it when I look back in two years' time.</p>
+
+<h2>Links/misc</h2>
+
+<p><a href="/trng/NCSULUG_ik_trng_slides.pdf"><b>Slides</b> from my talk</a> at the <a href="http://lug.ncsu.edu">NCSU Linux Users' Group</a></p>
+
+<p><a href="/trng/2014-07-18_dieharder_test.txt"><b>Test output</b></a> from the <a href="http://www.phy.duke.edu/~rgb/General/dieharder.php">dieharder test suite</a></p>
+
+<p>I may never get around to cleaning and uploading the <b>firmware source code</b>. Anyway, there is nothing relevant to this application. The firmware just implements a USB mass storage device on the LPC1343. Feel free to e-mail me (see <a href="http://iank.org/">the home page</a>) with questions.</p>
+
+<p>While not explicitly referenced, I found these <b>links</b> interesting or useful:</p>
+<ul>
+<li><a href="http://holdenc.altervista.org/avalanche/">http://holdenc.altervista.org/avalanche/</a></li>
+<li><a href="https://code.google.com/p/avr-hardware-random-number-generation/wiki/AvalancheNoise">https://code.google.com/p/avr-hardware-random-number-generation/wiki/AvalancheNoise</a></li>
+<li><a href="http://www.random.org/analysis/">http://www.random.org/analysis/</a></li>
+<li><a href="http://www.cs.berkeley.edu/~daw/papers/ddj-netscape.html">http://www.cs.berkeley.edu/~daw/papers/ddj-netscape.html</a></li>
+<li><a href="http://gamesbyemail.com/News/DiceOMatic">http://gamesbyemail.com/News/DiceOMatic</a></li>
+<li><a href="http://boallen.com/random-numbers.html">http://boallen.com/random-numbers.html</a></li>
+</ul>
+
+<h2>Footnotes</h2>
+
+
+<p><sup><a id="fnh1" /><a href="#foot1">1</a></sup> Or at least are demonstrably unpredictable. Whether a phenomenon is truly random is, pedantically, a philosophical question.</p>
+
+<p><sup><a id="fnh2" /><a href="#foot2">2</a></sup> They certainly do not, but there is some question as to whether quantum effects are relevant at this scale, so I am being conservative.</p>
+<p><sup><a id="fnh3" /><a href="#foot3">3</a></sup> A rough-but-conservative estimate of the number of interactions at hand follows, but note that this may still be a gross overestimate of the number of <b>relevant</b> interactions:</p>
+
+<ul>
+<li>In one study the longest mean free path, $\lambda$ for electrons in boron-doped silicon was 135 angstroms [<a id="note6" /><a href="#ref6">6</a>].</li>
+<li>Given a drift velocity $V_d \approx 10^4$ m/s,</li>
+<li>Mean free time $\tau = \lambda / V_d \approx 10^{12}$ collisions per electron per second</li>
+<li>and a conservative estimate of $\sim 10^{10}$ electrons in our PN junction (consider the molar volume of intrinsic Si in a structure on the order of cubic micrometers)</li>
+</ul>
+
+I'm likely very far off from the correct answer, but it is at least clear that we are dealing with large numbers.
+</p>
+
+<p><sup><a id="fnh4" /><a href="#foot4">4</a></sup> The true cost of services like this is time. Because of the batching process which is typically how PCB manufacturing services are available at the hobbyist price point, and shipping from Hong Kong, it takes about one month to receive a finished PCB. This also means mistakes are very time-costly. I was fortunate enough to make no fatal errors throughout the project. Still, the project was completed over the course of six months of intermittent several-hour sessions.</p>
+
+<h2>References</h2>
+<p>[<a id="ref1" /><a href="#note1">1</a>] Mlodinow, Leonard. <i>The drunkard's walk: How randomness rules our lives</i>. Random House LLC, 2009.</p>
+<p>[<a id="ref2" /><a href="#note2">2</a>] Silver, Nate. <i>The signal and the noise: Why so many predictions fail-but some don't</i>. Penguin, 2012.</p>
+<p>[<a id="ref3" /><a href="#note3">3</a>] Goldacre, Ben. <i>Bad science: Quacks, hacks, and big pharma flacks</i>. Random House LLC, 2010.</p>
+<p>[<a id="ref4" /><a href="#note4">4</a>] Jabr, Ferris. "Lottery wins come easy, if you can spot the loopholes." NewScientist.com. New Scientist, 19 Aug. 2011. Web. 18 Mar. 2014 <a href="http://www.newscientist.com/article/mg21128264.900-lottery-wins-come-easy-if-you-can-spot-the-loopholes.html">http://www.newscientist.com/article/mg21128264.900-lottery-wins-come-easy-if-you-can-spot-the-loopholes.html</a>.</p>
+<p>[<a id="ref5" /><a href="#note5">5</a>] "PokerStars Random Number Generator." PokerStars.com. PokerStars. Web. 18 Mar. 2014 <a href="http://www.pokerstars.com/poker/rng/">http://www.pokerstars.com/poker/rng/</a>.</p>
+<p>[<a id="ref6" /><a href="#note6">6</a>] Verwey, J.F.; Kramer, R.P.; De Maagt, B.J., "Mean free path of hot electrons at the surface of boron-doped silicon," <i>Journal of Applied Physics</i>, vol.46, no.6, pp.2612,2619, Jun 1975 doi: 10.1063/1.321938</p>
+<p>[<a id="ref7" /><a href="#note7">7</a>] McIntyre, R. J. "Multiplication noise in uniform avalanche diodes." <i>Electron Devices</i>, IEEE Transactions on 13.1 (1966): 164-168.</p>
+
+
+<hr />
+<p>(c) 2014 Ian Kilgore</p>
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+
+<!--#include virtual="end.html" -->
+
+

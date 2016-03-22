@@ -1,0 +1,186 @@
+<!--#include virtual="pre.html" -->
+<title>iank.org - A Localized Route-Finding Genetic Algorithm</title>
+<!--#include virtual="pre2.html" -->
+
+<div class="header">
+<h1>A Localized Path-Finding Genetic Algorithm</h1>
+<div class="byline">Posted August 17, 2013 by Ian Kilgore</div>
+</div>
+
+<h2>Localized Path-Finding</h2>
+
+<p>Below I implement a genetic algorithm which attempts the following problem:</p>
+<p style="padding-left:10%;">Find a model which can, as an autonomous agent, traverse the lowest-cost path across some weighted map <b>using only local information</b>.</p>
+<p>If this agent had prior knowledge of the entire map, determining the best path across it would be an objective (and well-studied) matter. In the following I attempt to train an agent to solve this problem with limited (local) information. These agents make decisions based only on four numbers: the relative heights of the terrain one "move" away in each of four directions (i.e., they can see no further than they can move).</p>
+
+<p>On a uniformly-weighted space the lowest-cost path is simply the shortest, but here cost may be a proxy for difficult or rough terrain, or an abstraction. Below I will discuss the formulation and implications of the cost function used.</p>
+
+<h2>Terrain and Sample Problem</h2>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/problem_ex.png" data-lightbox="sc-1" title="Example Depth Map With Source, Destination, and Two Possible Paths"><img class="example-image" src="erasmus/problem_ex_t.png"></img></a>
+</div>
+
+<p>The figure above shows one possible problem space. The grey levels in the image can be understood as a height map, with lighter pixels representing higher altitudes. The red circle is a starting position, and an agent must attempt to cross the vertical green line on the right border of the image. Shown in yellow and blue are two possible paths from source to destination.</p>
+
+<p>A successful agent should strike a balance between the shortest path and one that involves the least amount of steep climbs or descents. It should attempt to follow altitude contours when possible, but occasionally climb (or descend) a hill for a significant shortcut.</p>
+
+<p>Readers uninterested in the details of implementation may wish to skip to <a href="#results">results</a> below.</p>
+
+<h2>Cost Function</h2>
+
+<p>It is intuitive that the yellow, longer path is a worse solution than the blue, straightforward one. This notion can be made objective by computing a cost which is equal to the length of the path. I also discretize the problem: an agent only moves in quantum steps of length $\epsilon$, where $\epsilon$ is measured in pixels. This cost function is then proportional (or equal) to $N$, the number of steps required to complete the path:</p>
+
+\begin{equation}
+C = N
+\end{equation}
+
+<p>The shortest path (a straight line) is now always the best path, so this cost function must be augmented to take changes in altitude into account. The cost calculation becomes:</p>
+
+\begin{equation}
+C = \sum\limits_{n=1}^N g_n^2 + \lambda N
+\end{equation}
+
+<p>where</p>
+
+\begin{equation}
+g_n = 
+\begin{cases}
+\Delta_n, & \text{if }\Delta_n \geq 0\\
+-\frac{\Delta_n}{2}, & \text{if }\Delta_n < 0
+\end{cases}
+\end{equation}
+
+<p>for each step $g_n$ along the path. $\Delta_n$ is the change in height for that step. This cost is a function of both path length and the amount of climbing and descending one must do to complete the path. Note that cost scales with $g_n$ squared, meaning that very steep climbs and descents are penalized more strongly than shallow ones. Also, the cost for a descent is less than for a climb, but still positive (consider driving a vehicle down a steep, unpaved slope).</p>
+
+<p>The parameter $\lambda$ controls the trade-off in cost between path length and altitude change: when $\lambda$ is very large, the path length component dominates and shorter paths will be selected at the cost of climbing. When $\lambda$ is very small, paths which minimize climbing will be favoured.</p>
+
+<p>Finally, many agents never find a complete path. A (very large) fixed-cost penalty, $Q$, is added to their total costs.</p>
+
+<h2>Agent Model</h2>
+<h3>Model Input</h3>
+
+<p>I model an agent as a function which, at each step, decides which direction to move based on information about the relative height of its immediate surroundings. The input at each step, $\mathbf{x}$, is a vector of length $d$ of (an approximation of) the directional derivatives around the agent's current position:</p>
+
+\begin{equation}
+
+x_i = \frac{h([x,y] + \epsilon\angle\theta_i)-h([x,y])}{\epsilon} \text{ for } i=1,...,d
+
+\end{equation}
+
+<p>Here $h(x,y)$ represents the height at position $(x,y)$. The angles $\theta_i$ are spaced evenly along the unit circle. So the vector $\mathbf{x}$ is the difference in height between an agent's current position and $d$ surrounding locations which are $\epsilon$ units away. For a differentiable surface, the gradient of $h(x,y)$ is sufficient to describe it, but for this approximate model I have chosen $d=4$.</p>
+
+<h3>Model Parameters and Output</h3>
+
+<p>At each step the agent must decide a new direction in which to move. This should be an angle, $\phi$, between $\pi$ and $-\pi$. The model becomes a function $A$ of $\mathbf{x}$, parameterized by some unknown vector $\alpha$:</p>
+
+\begin{equation}
+\hat{\phi} = A_\mathbf{\alpha}(\mathbf{x})
+\end{equation}
+
+<p>The core of this model, $\mathbf{\alpha}^\top\mathbf{x}$, is a simple linear combination of the parameters, $\mathbf{\alpha}$, and the input vector $\mathbf{x}$. The output is then "squished" with a sigmoid function and normalized between $-\pi$ and $\pi$:</p>
+
+\begin{equation}
+A_\mathbf{\alpha}(\mathbf{x}) = 2\pi\left(\frac{1}{1+exp(\mathbf{\alpha}^\top\mathbf{x})}-0.5\right)
+\end{equation}
+
+<p>I show below that a model with only $d=4$ parameters is sufficient for reasonable performance as a path-finding agent. A genetic algorithm, below, is used to find near-optimal values for these four parameters.</p>
+
+<h2>Genetic Algorithm</h2>
+
+<p>A <a href="http://en.wikipedia.org/wiki/Genetic_algorithm">Genetic algorithm</a> attempts to solve an optimization problem by mimicking evolution. Genetic algorithms are well-studied, so I will describe only my implementation for this problem. I represent each individual as a list of floating-point "genes" (in this case, each individual has four genes corresponding to the model parameters $\mathbf{\alpha}$. </p>
+
+<p><ul>
+<li>An initial population of $P=200$ individual agents is randomly generated. I initialize weights using a long-tailed <i>t</i> distribution. This encourages diversity in the gene pool by creating a few more relatively large weights (as opposed to a normal distribution) [<a id="note3" /><a href="#ref3">3</a>].</li>
+<li>Each agent is run and its total cost computed</li>
+<li>The best individual from the previous generation is carried over unchanged. This is referred to as <i>elitism</i>, and prevents the algorithm from throwing away the most fit individual through crossover or mutation [<a id="note1" /><a href="#ref1">1</a>]. It has also been shown to decrease convergence time [<a id="note2" /><a href="#ref2">2</a>].</li>
+<li>A new population is bred:</li>
+<li><ul>
+    <li>Two parents are selected with probability proportional to the reciprocal of their associated cost</li>
+    <li>The two parents are combined using <a href="http://en.wikipedia.org/wiki/Crossover_(genetic_algorithm)#Two-point_crossover">two-point crossover</a>, creating a child individual</li>
+    <li>These children are mutated by adding a small random offset to each gene with a 4% probability.</li>
+    <li>This is repeated until 90% of the new generation has been created</li>
+    <li>The remaining 10% of the new generation are initialized randomly</li>
+</ul></li></ul></p>
+
+<h2><a id="results">Results</h2>
+
+<h3>GA vs Control</h3>
+
+<p>In order to demonstrate that the genetic algorithm is productively solving this problem, I compare it to a control. The control algorithm keeps the best individual from the previous generation, as in the GA. Every other individual, however, is randomly generated. The following figures show that a genetic algorithm (left) outperforms a random search (right) of the parameter space. The cost function here has been tuned to discourage climbing in favour of longer, contour-following paths.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/gavs.png" data-lightbox="sc-2" title="Path taken by best agent found by Genetic Algorithm"><img class="example-image" src="erasmus/gavs_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/rndvs.png" data-lightbox="sc-2" title="Path taken by best agent found by random selection"><img class="example-image" src="erasmus/rndvs_t.png"></img></a>
+</div>
+
+<h3>Evolution of Best Path</h3>
+
+<p>In the figures below, the best path for several different generations is evolved. The algorithm finds a global solution fairly quickly, and then optimizes certain local difficulties. The first image, below, shows the initial (random) best path, which does not reach the objective. After a few generations, a reasonable solution has been found but three problem areas (outlined in blue) remain. The next row of images focus on only the lower-right problem area. We see that the path, while initially confused, begins to straighten out after several generations.</p>
+
+<p><a href="erasmus/evolution.txt">Text output from this experiment</a> is available. It is possible here to see how the percentage of the population which sucessfully completes any route grows as successful individuals are selected to reproduce.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/gen01.png" data-lightbox="sc-3" title="Initial (random) solution"><img class="example-image" src="erasmus/gen01_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/gen11.png" data-lightbox="sc-3" title="Global (coarse) solution found after 11 generations. Local problem areas outlined in blue."><img class="example-image" src="erasmus/gen11_t.png"></img></a>
+</div>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/gen11_p1.png" data-lightbox="sc-4" title="Local problem area w/in global/coarse solution"><img class="example-image" src="erasmus/gen11_p1_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/gen15_p2.png" data-lightbox="sc-4" title="Iteration upon problem area"><img class="example-image" src="erasmus/gen15_p2_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/gen22_p3.png" data-lightbox="sc-4" title="Iteration upon problem area"><img class="example-image" src="erasmus/gen22_p3_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/gen36_p4.png" data-lightbox="sc-4" title="Iteration upon problem area"><img class="example-image" src="erasmus/gen36_p4_t.png"></img></a>
+</div>
+
+<h3>Step cost and differentiability</h3>
+
+<p>Although the best path in the previous section eventually became somewhat smooth, its jagged nature can be improved upon. The jaggedness of that path can be attributed to two factors:</p>
+<p><ul>
+<li>The images in the previous section were generated using a low step cost $\lambda$. This low step cost does not serve well to discourage too-long paths.</li>
+<li>The image used as a map is discontinuous (i.e. not differentiable) at the transitions between white and black. In this case the agent has no information about the upcoming cliff until it hits it. It cannot choose an intermediate angle and must proceed in a zig/zag fashion.</li>
+</ul></p>
+
+<p>By smoothing the image (by a 20x20 boxcar filter) and increasing the step cost, we can find a much better route through the image. From left to right:</p>
+<p><ul>
+<li>In the first figure below, the problem is demonstrated. The image is discontinuous, and $\lambda=0.001$.</li>
+<li>In the second figure, the image has been smoothed, but the step cost remains $\lambda=0.001$.</li>
+<li>Next, the step cost is increased to $\lambda=50$</li>
+<li>Next, the step cost is increased to $\lambda=1000$, and we see a relatively smooth path.</li>
+<li>Finally, we are shown a global view of the previous image (with $\lambda=1000$), showing the smoother path. Also note that some shortcuts have been taken.</li>
+</ul></p>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/soln4.png" data-lightbox="sc-5" title="Zig-zag path due to low step cost and discontinuous image"><img class="example-image" src="erasmus/soln4_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/soln1.png" data-lightbox="sc-5" title="Problem is ameliorated by smoothing the image"><img class="example-image" src="erasmus/soln1_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/soln2.png" data-lightbox="sc-5" title="Step cost is increased to lambda=50 resulting in a shorter path"><img class="example-image" src="erasmus/soln2_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/soln3.png" data-lightbox="sc-5" title="Further increase in step cost (lambda=1000) results in a shorter, smoother path"><img class="example-image" src="erasmus/soln3_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/soln3_global.png" data-lightbox="sc-5" title="Global view of previous image"><img class="example-image" src="erasmus/soln3_global_t.png"></img></a>
+</div>
+
+<h3>Generalization</h3>
+
+<p>A simple experiment shows that these agents have some limited capacity for generalization. An agent was trained on a perlin noise depth map using an initial position near the centre of the image. It proceeded to its goal while attempting to maintain the same altitude throughout. The same agent was then run starting at the far left of the image (at a different altitude) and then found a reasonable path to its goal, again maintaining a relatively uniform altitude throughout.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/bestroute_trained.png" data-lightbox="sc-6" title="Best route found during training"><img class="example-image" src="erasmus/bestroute_trained_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/bestroute_generalized.png" data-lightbox="sc-6" title="Same agent released at a different starting position"><img class="example-image" src="erasmus/bestroute_generalized_t.png"></img></a>
+</div>
+
+<p>This capacity for generalization has limits. In the following example, there is a conduit through the image with a fork. One fork is a route through, and the other is not. Because these agents work using only local knowledge, it is impossible to determine a priori which path is best (It is impossible for even a truly intelligent agent to choose the correct path given only the information at hand).</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="erasmus/genfail1.png" data-lightbox="sc-7" title="Trained agent on forked path finds a way through"><img class="example-image" src="erasmus/genfail1_t.png"></img></a>
+    <a class="example-image-link" href="erasmus/genfail2.png" data-lightbox="sc-7" title="Same agent with the forks reversed fails to find the best route"><img class="example-image" src="erasmus/genfail2_t.png"></img></a>
+</div>
+
+
+<h2>Code</h2>
+
+<p>MATLAB code for this demo may be found on github: <a href="https://github.com/iank/erasmus">iank/erasmus</a>.</p>
+
+<h2>References</h2>
+<p>[<a id="ref1" /><a href="#note1">1</a>] G. Rudolph. Evolutionary search for minimal elements in partially ordered ﬁnite sets. In V. W. Porto, N. Saravanan, D. Waagen, and A. E. Eiben, editors, <i>Evolutionary Programming VII, Proceedings of the 7th Annual Conference on Evolutionary Programming</i>, pages 345–353. Springer, Berlin, 1998.</p>
+<p>[<a id="ref2" /><a href="#note2">2</a>] E. Zitzler, K. Deb, and L. Thiele. Comparison of Multiobjective Evolutionary Algorithms: Empirical Results. <i>Evolutionary Computation</i> 8.2 (2000): 173-195.</p>
+<p>[<a id="ref3" /><a href="#note3">3</a>] D. Montana and L. Davis. Training Feedforward Neural Networks Using Genetic Algorithms. <i>IJCAI</i>, vol. 89 (1989): 762-767</p>
+
+<!--#include virtual="end.html" -->

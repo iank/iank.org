@@ -1,0 +1,88 @@
+/* Body font, color, margin */
+body {
+    margin: 0 15% 0 15%;
+    background-color: #f8f8f8;
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+}
+
+/* For the nav bar */
+ul.nav {
+    list-style-type:none;
+    margin:0;
+    padding:0;
+    padding-top:6px;
+    padding-bottom:6px;
+}
+ul.nav li {
+    display:inline-block;
+    width: 15%;
+    font-weight: bold;
+}
+ul.nav a {color: #2f4f4f; }
+ul.nav a:hover { text-shadow: 1px 1px 2px grey }
+
+
+/* Header/banner image */
+#header {
+    background: black url(/img/tb.jpg) center no-repeat;
+    height: 214px;
+}
+#headerline {
+    margin-top: 10px;
+    border-bottom: solid 1px gray;
+}
+#headerline2 {
+    margin-bottom: 10px;
+    border-top: solid 1px gray;
+}
+
+/* Lightbox figures */
+.image-row {
+  margin-right: auto;
+  margin-left: auto;
+  *zoom: 1;
+    display: table;
+  margin-bottom: 20px;
+}
+.image-row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.example-image-link {
+  display: inline-block;
+  margin: 0 10px 20px 10px;
+}
+.example-image-link:hover {
+  border: 1px solid #00bfa8;
+}
+.example-image {
+   padding:1px;
+   border:1px solid #021a40;
+}
+
+
+/* Inline figures */
+figure {
+    position: relative;
+//    display: table;
+}
+figcaption {
+//    text-align: center;
+//    margin: 0.2em 0 0 3em;
+}
+figure img {
+    padding:1px;
+    border:1px solid #021a40;
+//    width: 100%;
+}
+/* List of links */
+ul.linklist a:link {color: #2f4f4f; }
+
+/* Byline positioning and size */
+div.header h1{
+    margin-bottom: 0.1em;
+}
+div.byline {
+    font-size: x-small;
+}

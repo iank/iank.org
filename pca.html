@@ -1,0 +1,118 @@
+<!--#include virtual="pre.html" -->
+<title>iank.org - PCA on X-Plane images</title>
+<!--#include virtual="pre2.html" -->
+
+<div class="header">
+<h1>PCA on X-Plane Images</h1>
+<div class="byline">Posted July 21, 2013 by Ian Kilgore</div>
+</div>
+
+<h2>Problem</h2>
+<p>As a demonstration of a multivariate analysis technique I have formulated a classification task: <b>Given screenshots of a cockpit in the flight simulator <a href="http://www.x-plane.com/">X-Plane</a>, discriminate between left and right banking.</b></p>
+
+<div class="image-row">
+    <a class="example-image-link" href="pca/screenshot_49.png" data-lightbox="sc-1" title="Example Screenshot Indicating Right Bank"><img class="example-image" src="pca/screenshot_49_thumb.png"></img></a>
+    <a class="example-image-link" href="pca/screenshot_119.png" data-lightbox="sc-1" title="Example Screenshot Indicating Left Bank"><img class="example-image" src="pca/screenshot_119_thumb.png"></img></a>
+</div>
+
+<h2>Method</h2>
+
+<h3>Data and Preprocessing</h3>
+<p>$$n=101 \text{ screenshots}$$ were taken at various points during simulated left and right turns, then hand-labelled as either 'left' or 'right'. These screenshots are 1180x800 8-bit RGB images, which can be represented using $$1180 \cdot 800 \cdot 3 = 2,832,000 \text{ values}$$</p>
+
+<p>If we are to use these images as feature vector inputs to a supervised learner, we find that 2.8 million-dimensional vectors are too large for practical applications.</p>
+
+<p>As an initial step, we may remove some redundancy in these images by converting them to 118x80 grayscale:</p>
+
+<blockquote>09:44 &lt; ik&gt; ik's principled guide to multivariate analysis: if the data is too big, just throw away a lot of it</blockquote>
+
+<p>This leaves us with screenshots resembling the following low-resolution grayscale images. These images can be represented as 9440-dimensional feature vectors, which are still rather large.</p>
+
+<figure>
+  <img style="width:118px; height:80px;" src="pca/right_49.png" alt="Cockpit screenshot indicating right bank">
+  <img style="width:118px; height:80px;" src="pca/left_119.png" alt="Cockpit screenshot indicating left bank">
+</figure>
+
+<p>It is clear that these images still exhibit much redundancy. The cockpit interior, for instance, is mostly either constant across all images (the cowling and blank space between instruments), or noise (most of the instruments vary between screenshots but are not useful for determining bank direction). The sky is mostly featureless and the ground is noise (we do not care if we are looking at a runway or a pasture). The only element of these images we are interested in is the horizon (and possibly the artificial horizon instrument and the turn coordinator).</p>
+
+<p>I made this problem easy by selecting only screenshots where the horizon was visible (ie, some sky and some ground was visible in each picture). So the slope of the horizon is a sufficient statistic for our task. (Had this not been the case, we would want to focus on the artificial horizon instrument).</p>
+
+<p>We can, of course, write some heuristic to extract the important information from these images, but there is a general method.</p>
+
+<h3>Principal Component Analysis</h3>
+<p>Much has been written about <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">PCA</a>, so this section will only summarize the technique as I have implemented it in the solving of this problem. Here, we use PCA for dimensionality reduction: By selecting only the first <i>s</i> principal components, we can transform our <i>d</i>-dimensional data <i>X</i> to a <i>s</i>-dimensional subspace while retaining most of the variance of the data (thereby discarding some correlated variables (ie, redundancy) and noise). Of course, <i>d</i> &gt;&gt; <i>s</i>.</p>
+
+<p>Given <i>n</i> observations of <i>d</i>-dimensional data <i>X</i> (the values of X are, in this case, pixel intensities represented as integers ranging from 0 to 255):</p>
+$$\mathbf{X}_{n \times d}$$
+
+<p>We take the mean of each column and subtract from the data:</p>
+\begin{equation}
+\mathbf{\Psi} = \frac{1}{n}\sum\limits_{i=1}^n \vec{x}_i
+\end{equation}
+\begin{equation}
+\mathbf{\Phi} = \mathbf{X} - \mathbf{\Psi}
+\end{equation}
+
+<p>A covariance matrix is computed:</p>
+\begin{equation}
+\mathbf{C} = \mathbf{\Phi}^\top\mathbf{\Phi}
+\end{equation}
+
+<p>Note that this covariance matrix can be very large (<i>d</i>-by-<i>d</i> or, in our case, 9440 by 9440). In practise, <a href="https://en.wikipedia.org/wiki/Principal_component_analysis#The_NIPALS_method">other methods</a> are used to find the first few principal components without computing the entire covariance matrix.</p>
+
+<p>We find the eigenvalues and eigenvectors of the covariance matrix such that:</p>
+\begin{equation}
+\mathbf{V}^{-1}\mathbf{C}\mathbf{V} = \mathbf{\Lambda}
+\end{equation}
+
+<p>where V is a matrix of <i>d</i> column vectors corresponding to the <i>d</i> eigenvectors of C, and Λ is a diagonal matrix with the <i>d</i> corresponding eigenvalues on its diagonal.</p>
+
+<p>We can think of the high-eigenvalued eigenvectors as modelling the signal subspace in our data, and the low-eigenvalued eigenvectors as modelling the noise subspace. Alternatively we can think of the high-eigenvalued eigenvectors as <i>axes</i> along which our data has much variance. If we sort the eigenvalues and plot them, we have:</p>
+
+<figure>
+  <img height="300px" src="pca/values.png" alt="Eigenvalues of Covariance Matrix">
+  <figcaption>Eigenvalues of Covariance Matrix</figcaption>
+</figure>
+
+<p>Note that I have zoomed in on the first fifty or so eigenvalues so as to show some detail. In reality there are 9440 of them. In most applications, the contrast between high values and low values is not nearly so sharp. So we have a good cutoff point, and we see that there are relatively few high eigenvalues, suggesting that the data is indeed mostly correlated.</p>
+
+<p>While it may be advisable to select a few more, I let <i>s</i> = 2 to allow for visualization. So we take the two highest-eigenvalued eigenvectors and create a matrix which we can use to transform our data:</p>
+
+\begin{equation}
+\mathbf{U}_{d \times 2} = [\begin{array}{cc} \vec{\lambda}_1 & \vec{\lambda}_2 \end{array}]
+\end{equation}
+
+<p>We may now project our data into this two-dimensional space and plot it:</p>
+\begin{equation}
+\mathbf{X}_f = (\mathbf{X} - \mathbf{\Psi})\times\mathbf{U}^\top
+\end{equation}
+
+<figure>
+  <img height="300px" src="pca/2value.png" alt="X-Plane screenshots mapped onto two-dimensional space">
+  <figcaption>X-Plane Screenshots Mapped onto Two-Dimensional Space</figcaption>
+</figure>
+
+<p>I have plotted data points corresponding to each class ('left', 'right') with different colours. So we see that even with only two principal components we can achieve fairly good separation (even a linear classifier would do well here).</p>
+
+<h2>Results</h2>
+
+<p>Returning to our original problem. Given <i>n</i> observations of <i>d</i>-dimensional data <i>X</i> (screenshots) we should like to predict the class labels <i>Y</i> corresponding to 'right' and 'left' bank:</p>
+
+$$\mathbf{X}_{n \times d}, \; \vec{Y}_n$$
+
+<p>Using <a href="http://sugiyama-www.cs.titech.ac.jp/~sugi/2010/LSPC.pdf">LSPC</a>, a fast non-linear supervised classifier, we may attempt to separate this data. I used 75 screenshots to train, and withheld 26 for testing.</p>
+
+<p>By training LSPC on these 75 screenshots (projected into two dimensions), we find functions which estimate the posterior probability that a screenshot is a member of class Y = 1 or 2.</p>
+
+$$\text{find } \hat{P}(Y=1|x_i); \hat{P}(Y=2|x_i)$$
+
+<p>The estimated posterior probabilities are plotted as a heatmap over the two-dimensional data (this plot actually shows the training data, not the withheld test data). We make our decision at P(Y|x) = 0.5</p>
+
+<figure>
+  <img src="pca/boundary.png" alt="Decision boundary">
+  <figcaption>Estimated posterior probability (decision boundary = 0.5)</figcaption>
+</figure>
+
+<p>Using this model we estimate the class label for our 26 withheld examples and find that it <b>correctly classified 25 of the 26 screenshots</b> (corresponding to an error rate of about 3.85%).</p>
+
+<!--#include virtual="end.html" -->

@@ -1,0 +1,93 @@
+<!--#include virtual="pre.html" -->
+<title>iank.org - Autorouting PCBs - A trivial case</title>
+<!--#include virtual="pre2.html" -->
+
+<div class="header">
+<h1>Autorouting PCBs - Trivial case</h1>
+<div class="byline">Posted August 11, 2013 by Ian Kilgore</div>
+</div>
+
+<h2>Problem</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Routing_(electronic_design_automation)">Routing</a>, in electronic design, is a difficult and often intractible problem. Usually it is done with at least some human intervention. Most Electronic Design Automation packages include sophisticated software tools to allow the routing process to be machine-assisted or, in some cases, entirely automatic. Below I investigate some of the simplest methods for solving this problem, and demonstrate a working (albeit trivial) example of an automated approach.</p>
+
+<p>The problem of routing deals with 'nets', which are lists of pins or pads which must be connected by some conductor. Also, different nets should not be electrically connected. This class of error is called a 'short'. Shorts with other nets can be avoided when routing a net by:
+<ul>
+    <li>Simply routing around any existing routes which are in the way (as in <i>Tron</i>)</li>
+    <li>Using multiple layers to allow routes to avoid each other 'vertically'. This requires placing <a href="http://en.wikipedia.org/wiki/Via_(electronics)">vias</a>, which introduces additional cost.</li>
+    <li>As a last resort, a jumper wire can be introduced in order to complete a route.</li>
+</ul>
+</p>
+
+<p>Other design rules must be obeyed. In the case of printed circuit boards, fabrication processes have minimum trace widths, spacing tolerances, and so on. Wire length must be minimized and, depending on the domain, there are other electrical constraints to be considered.</p>
+
+<h2>Method</h2>
+
+<p>Several simple algorithms are described in [1] below. The Lee Algorithm is straightforward, and can be used to route nets with multiple nodes. Routing can also take place on a weighted grid. Instead of minimizing wire length (as if all weights were unity), we then attempt to find paths with minimum <b>cost</b>. In future problems I assign weights in order to discourage (but still allow, as a first pass) errors such as shorts or design rule violations. In the demonstration below, however, all weights are either unity or infinity (blocked cells, e.g. pads and already-routed tracks).</p>
+
+<p>This approach finds many possible paths from some source[s] to a destination node by wave propagation, then picks the lowest-cost path by tracing backwards. It may be useful to skip to the <a href="#vis">visualization</a> below before proceeding.</p>
+
+<h3>Routing a single net</h3>
+
+<p>Setting aside for a moment the problem of choosing the order in which nets should be routed, we consider the problem of finding the best (or lowest-cost) route to a grid cell $T$ from one or many cells $\vec{S}$ (In the case of a three-node net in which two nodes have already been routed, we may connect the remaining node to any point in $\vec{S}$).</p>
+
+<p>This approach finds many possible paths to $T$ from $\vec{S}$ by propagating a wave from $\vec{S}$. We begin by considering the neighbors of $\vec{S}$, and marking them with the cost to reach each cell.</p>
+
+<p>For each $S_i$ in $\vec{S}$:
+<ul>
+    <li>Update cost to reach each neighbor, $N_j$ of $S_i$: $cost(N_j) = cost(S_i) + weight(N_j)$</li>
+    <li>(Some $N_j$ may already be marked. If so, only update if the new cost is less than the current)</li>
+    <li>Stop once we reach $T$. In the case of a weighted grid, we should proceed until the route surronds $T$, in case a lower-cost path can be realized by approaching from a different direction.</li>
+</ul>
+</p>
+
+<p>An example of a propagated wave from S to T (labelled) is shown below. The deep red inclusions in the wave are cells with infinite weight (obstacles or pads belonging to different nets).</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="route1/waveprop.png" data-lightbox="sc-1" title="Wave from S to T showing many possible paths."><img class="example-image" src="route1/waveprop_t.png"></img></a>
+</div>
+
+<p>Now that each cell has been marked with a cost, the total cost for each discovered path can be computed by the sum of the cost for each cell along the way. The lowest-cost path can be discovered more simply, by backtracing a path from T to any S. (Simply follow the lowest-cost neighboring cell until an S is reached).</p>
+
+<h3>Routing order</h3>
+
+<p>One way to decide the order in which to route nets is to "order the nets in the ascending order of the [number] of pins within their bounding boxes[1]." This seeks to avoid enclosing or intersecting other would-be routes by routing the least extensive nets first. In the example below, this approach is successful.</p>
+
+<p>In practice, this may not lead to the best order. Other approaches require many passes: route order is chosen in some random fashion and nets are heuristically routed and 'ripped up' until all nets are routed, all possibilities are exhausted, or some time limit is exceeded.</p>
+
+<h2>Demo</h2>
+<p>I constructed an approximate grid based on the PCB for this
+<a href="http://www.learningelectronics.net/circuits/fridge-door-open-alarm-circuit-project.html">fridge "door open" alarm</a> project. The first figure below is the PCB from that project (I did not create it). The second figure is like a topological approximation. I have not preserved the scale. The node colours represent net membership, i.e. all of the light red nodes must be connected to each other through the routing process. The rightmost figure shows the final routed PCB.</p>
+
+<div class="image-row">
+    <a class="example-image-link" href="route1/orig.jpg" data-lightbox="sc-2" title="Original PCB layout"><img class="example-image" src="route1/orig_t.jpg"></img></a>
+    <a class="example-image-link" href="route1/unrouted.png" data-lightbox="sc-2" title="My approximated model- unrouted"><img class="example-image" src="route1/unrouted_t.png"></img></a>
+    <a class="example-image-link" href="route1/routed.png" data-lightbox="sc-2" title="Routed"><img class="example-image" src="route1/routed_t.png"></img></a>
+</div>
+
+<p>Below is an animation of this grid being routed by the method described above:
+<ul>
+    <li>The routing order is determined by the number of pins w/in a net's bounding box (not shown)</li>
+    <li>For each net (in order), until it is fully routed or unroutable:
+    <ul>
+        <li>Pick a source grid cell, 'S', at random (or, if partially routed, use the entire routed portion as a source)</li>
+        <li>Pick the closest destination, 'T'. This is the single blue cell shown in the upper subplot</li>
+        <li>Propagate wave from S to T across the weighted grid (Top Subplot)</li>
+        <li>Backtrace a lowest-cost path (Bottom Subplot)</li>
+    </ul></li>
+</ul>
+</p>
+
+
+<p><a id="vis"><iframe width="420" height="315" src="//www.youtube.com/embed/2kUMe5PkyCg" frameborder="0" allowfullscreen></iframe></a></p>
+
+<h2>Code</h2>
+
+<p>MATLAB code for this demo may be found on github: <a href="https://github.com/iank/route1">iank/route1</a>.</p>
+
+<h2>References</h2>
+<p>[1] H. Zhou. <i>Northwestern University EECS357, Introduction to VLSI CAD. Lecture 6 [PDF Document]</i>. Retrieved from: <a href="http://users.eecs.northwestern.edu/~haizhou/357/lec6.pdf">http://users.eecs.northwestern.edu/~haizhou/357/lec6.pdf</a></p>
+
+<!-- I have mirrored these slides at /route1/lec6.pdf in case they go away -->
+
+<!--#include virtual="end.html" -->
