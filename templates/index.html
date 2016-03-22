@@ -1,5 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="shortcut icon" href="http://iank.org/favicon.ico" />
   <meta name="author" content="Ian Kilgore">
+  <title>{% block title %}Ian Kilgore | iank.org{% endblock %}</title>
+
   <link rel="stylesheet" href="style.css">
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
@@ -38,10 +46,23 @@
 <body>
     <ul class="nav">
         <li><a href="/">Home</a></li>
-<!--        <li><a href="/kilgore_resume.pdf">Résumé</a></li> -->
         <li><a href="projects.html">Projects</a></li>
         <li><a href="papers.html">Publications</a></li>
         <li><a href="http://blog.iank.org">Blog</a></li>
     </ul>
     <div id="header"></div>
     <div id="headerline"></div>
+{% block content %}
+<h1>Ian Kilgore</h1>
+
+<p>I am an Electrical Engineering Ph.D. student at <a href="http://ncsu.edu">North Carolina State University (NCSU)</a>.</p>
+<p>On this website I have collected some <a href="/projects.html">projects</a> and <a href="/papers.html">publications</a>. I also have a <a href="http://blog.iank.org/">blog</a>.
+
+<p>I can be reached via e-mail at
+<script language="JavaScript">
+var ik = "iank"; var linktext = ik + "@" + ik + ".org" ;
+document.write("<a href='" + "mail" + "to:" + ik + "@" + ik + ".org" + "'>" + linktext + "</a>");
+</script> </p>
+{% endblock %}
+</body>
+</html>

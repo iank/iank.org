@@ -1,58 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="shortcut icon" href="http://iank.org/favicon.ico" />
-  <meta name="author" content="Ian Kilgore">
-  <title>iank.org - A CAPTCHA-breaking project</title>
-
-  <link rel="stylesheet" href="style.css">
-  <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
-      TeX: { equationNumbers: { autoNumber: "AMS" } }
-    });
-  </script>
-
-  <script src="js/jquery-1.10.2.min.js"></script>
-  <script src="js/lightbox-2.6.min.js"></script>
-  <script src="js/jquery.caption.js"></script>
-  <link href="lightbox.css" rel="stylesheet" />
-  <link href="captionjs.css" rel="stylesheet" />
-
-  <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-42718794-1', 'iank.org');
-    ga('send', 'pageview');
-
-  </script>
-
-  <script type="text/javascript"
-    src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>
-
-  <script>
-    $(window).load(function() {
-        $('img.example-image').captionjs();
-    });
-  </script>
-</head>
-<body>
-    <ul class="nav">
-        <li><a href="/">Home</a></li>
-        <li><a href="projects.html">Projects</a></li>
-        <li><a href="papers.html">Publications</a></li>
-        <li><a href="http://blog.iank.org">Blog</a></li>
-    </ul>
-    <div id="header"></div>
-    <div id="headerline"></div>
-
+{% extends "index.html" %}
+{% block title %}iank.org - A CAPTCHA-breaking project{% endblock %}
+{% block content %}
 <div class="header">
 <h1>Breaking reddit.com's CAPTCHA</h1>
 <div class="byline">Posted July 26, 2013 by Ian Kilgore</div>
@@ -121,6 +69,4 @@
 
 <h2>Notes</h2>
 <p>[*] Misclassification error is often a misleading metric. I should have used AUC here, or at least shown a ROC or confusion matrix.</p>
-
-</body>
-</html>
+{% endblock %}
