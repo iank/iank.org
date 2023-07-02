@@ -2,7 +2,7 @@
 template: post
 title: Cyclone IV-based Julia Set Explorer
 slug: cyclone-iv-julia-set-explorer
-socialImage: /media/julia_sq.png
+featured_image: /media/julia_sq.png
 draft: false
 date: 2021-12-27T01:09:54.578Z
 description: A custom Cyclone IV board interfaces with TFT LCD panel, capacitive

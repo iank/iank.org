@@ -2,7 +2,7 @@
 template: post
 title: "FROGSBORO: SAM9X60 SiP Embedded Linux"
 slug: frogsboro-embedded-linux-board-sam9x60-sip
-socialImage: /media/frogsboro_sq.jpg
+featured_image: /media/frogsboro_sq.jpg
 draft: false
 date: 2022-01-08T04:44:49.895Z
 description: Another custom embedded Linux board. I recently did a free

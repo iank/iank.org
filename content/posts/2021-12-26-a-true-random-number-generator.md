@@ -2,7 +2,7 @@
 template: post
 title: A True Random Number Generator
 slug: a-true-random-number-generator
-socialImage: /media/trng_final_assembled2.png
+featured_image: /media/trng_final_assembled2.png
 draft: false
 date: 2014-06-06T22:09:08.626Z
 description: A true random number generator project. A PN junction in avalanche

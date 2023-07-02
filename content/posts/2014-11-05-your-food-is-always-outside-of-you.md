@@ -2,7 +2,7 @@
 template: post
 title: Your Food is Always Outside of You
 slug: your-food-is-always-outside-of-you
-socialImage: /media/torus.png
+featured_image: /media/torus.png
 draft: false
 date: 2014-11-05T22:09:08.626Z
 description: I gave a talk at the NCSU Linux Users' Group.

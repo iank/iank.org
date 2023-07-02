@@ -2,7 +2,7 @@
 template: post
 title: A Custom i.MX6ULL Board
 slug: catfood-custom-imx6ull-board
-socialImage: /media/catfood_layout.png
+featured_image: /media/catfood_layout.png
 draft: false
 date: 2021-12-28T02:25:16.649Z
 description: As a vehicle for learning OrCAD, I built a custom embedded Linux

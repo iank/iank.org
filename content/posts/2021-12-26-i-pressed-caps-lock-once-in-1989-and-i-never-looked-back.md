@@ -2,7 +2,7 @@
 template: post
 title: '"I PRESSED CAPS LOCK ONCE IN 1989 AND I NEVER LOOKED BACK"'
 slug: i-pressed-caps-lock-once-in-1989
-socialImage: 
+featured_image: 
 draft: false
 date: 2014-12-29T19:05:00.000Z
 description: I get emotional about a Perl script

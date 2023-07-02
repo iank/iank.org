@@ -2,7 +2,7 @@
 template: post
 title: Mul-T-Lock Interactive Picked
 slug: mul-t-lock-interactive-picked
-socialImage: /media/multlock_sq.jpg
+featured_image: /media/multlock_sq.jpg
 draft: false
 date: 2019-03-21T19:59:00.000Z
 description: I picked a Mul-T-Lock Interactive key in knob cylinder, a
