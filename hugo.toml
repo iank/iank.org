@@ -1,0 +1,4 @@
+baseURL = 'https://iank.org/'
+languageCode = 'en-us'
+title = 'iank.org'
+theme = 'diary'
