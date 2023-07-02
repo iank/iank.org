@@ -5,11 +5,7 @@ slug: frogsboro-embedded-linux-board-sam9x60-sip
 featured_image: /media/frogsboro_sq.jpg
 draft: false
 date: 2022-01-08T04:44:49.895Z
-description: Another custom embedded Linux board. I recently did a free
-  evaluation of Altium Designer and built this as a way to try it out. The
-  design is based on the SAM9X60 SiP and has a USB device port, two USB host
-  ports, a microSD card, and a low profile 40-pin expansion connector which
-  breaks out GPIOs and peripherals.
+description: A custom embedded Linux board based on the SAM9X60 SiP.
 category: Hardware
 tags:
   - hardware
@@ -23,13 +19,13 @@ Design files: [Schematic (pdf)](/media/frogsboro_schematic_v1.0.2.pdf), [BOM (pd
 
 **Update 2022-04-17**: Added a section on the stencil alignment fixture.
 
-![Completed PCB, top view. The board measures 67mm by 21mm, has a mini USB-B connector sticking out over one end and two vertical USB-A connectors on the other.](/media/frogsboro_top_complete.jpg "Completed FROGSBORO PCB, top")
+{{< figure src="frogsboro_top_complete.jpg" caption="Completed PCB, top view." alt="The board measures 67mm by 21mm, has a mini USB-B connector sticking out over one end and two vertical USB-A connectors on the other." >}}
 
-![Completed PCB, bottom view. There is a microSD card connector on one end and a 40-pin low-profile board-to-board connector nearby.](/media/frogsboro_bottom_complete_side.jpg "Completed FROGSBORO PCB, bottom")
+{{< figure src="frogsboro_bottom_complete_side.jpg" caption="Completed PCB, bottom view." alt="There is a microSD card connector on one end and a 40-pin low-profile board-to-board connector nearby." >}}
 
 ## Layout
 
-![A screenshot of some of the gerber layers superimposed upon each other.](/media/frogsboro_layout.png "FROGSBORO Layout")
+{{< figure src="frogsboro_layout.png" caption="" alt="A screenshot of some of the gerber layers superimposed upon each other." >}}
 
 I used a six layer stackup from a low-cost fab. It measures 67mm by 21mm. A MIC2800 PMIC provides the three necessary voltage rails. An oscillator and a crystal provide the core clocks, there's a DDR voltage reference, and the various connectors have ESD protection. (This is the first spin of the board; the 1.0.2 version number reflects some back and forth with the fab). The total cost for PCBs, stencils, and components was around $200.
 
@@ -39,29 +35,29 @@ I used a six layer stackup from a low-cost fab. It measures 67mm by 21mm. A MIC2
 
 I'm experimenting with a new alignment fixture for applying paste. In the past I've used scrap PCBs to frame the board and a masking tape hinge on one edge of the stencil [(Video from JLCPCB](https://www.youtube.com/watch?v=uXvXwzQf1gU), [Tutorial from Sparkfun](https://www.sparkfun.com/tutorials/58)). This has worked well enough for me. It takes some time to line everything up and tape it down, but once set up it's surprisingly repeatable. It's stressful to set up for just a few boards though, and double-sided assembly is a pain since the setup needs to be elevated to apply paste to the second side.
 
-![The bare PCBs (top and bottom), with the breakaway rails still attached.](/media/frogsboro_blank.jpg "Bare FROGSBORO boards with breakaway rails")
+{{< figure src="frogsboro_blank.jpg" caption="The bare PCBs (top and bottom), with the breakaway rails still attached." alt="Two blank PCBs side-by-side. The PCBs have rails on either side that are attached by thin tabs. The tabs have mouse bites drilled into them and can be broken away." >}}
 
 On this board I added breakaway rails with mouse bites[^1]. The rails each contain two stencil alignment holes, which are just a non-plated through hole and a corresponding footprint on the paste layer. Since it's not typical[^2] to have paste over holes I included a note to the fab to clarify that this was intentional. I then milled a fixture from a block of common pine.
 
-![Top: Stencil alignment fixture, milled from a block of pine. It has a recess for the board, cavities for components, and alignment holes. Inset left: Stencil alignment cross section in CAD program, showing the board (w/ top side components already assembled) sitting flush with the surface of the stencil fixture. Inset right: Screenshot of toolpaths from CAM program.](/media/frogsboro_stencil_fixture_crosssection.png "Stencil alignment fixture.")
+{{< figure src="frogsboro_stencil_fixture_crosssection.png" caption="Stencil alignment figure" alt="Top: Stencil alignment fixture, milled from a block of pine. It has a recess for the board, cavities for components, and alignment holes. Inset left: Stencil alignment cross section in CAD program, showing the board (w/ top side components already assembled) sitting flush with the surface of the stencil fixture. Inset right: Screenshot of toolpaths from CAM program." >}}
 
 The board sits in a recess so that the surface is flush with the wood, the stencil can sit on top of both, and gauge pins are used to fix everything in place. There is also a cavity to allow clearance for the top side components when applying paste to the bottom side.
 
-![Top: Stencil alignment fixture with board, stencil, and gauge pins inserted. Paste has been wiped across the stencil. Bottom: Stencil and gauge pins have been removed, revealing the board sitting in the fixture with paste applied.](/media/frogsboro_fixture_paste_application.jpg "Paste application")
+{{< figure src="frogsboro_fixture_paste_application.jpg" caption="Paste application" alt="Top: Stencil alignment fixture with board, stencil, and gauge pins inserted. Paste has been wiped across the stencil. Bottom: Stencil and gauge pins have been removed, revealing the board sitting in the fixture with paste applied." >}}
 
 There's obviously a different sort of setup time involved in the CAD/CAM and milling the fixture. In the end though it was pleasant to use, the alignment felt solid, and the resulting paste application was crisp and consistent. I won't use this for every board, but for double-sided boards and/or boards with small feature sizes it's a nice tool to have.
 
 ### Component Placement and Reflow
 
-![The PCB clamped onto a preheater, with some integrated circuits placed.](/media/frogsboro_top_ics_placed.jpg "FROGSBORO IC placement")
+{{< figure src="frogsboro_top_ics_placed.jpg" caption="IC placement" alt="The PCB clamped onto a preheater, with some integrated circuits placed." >}}
 
 Once paste was applied I used my normal method for assembly. I use my preheater (turned off) to clamp the board while I place components..
 
-![The board (top view) with all of the top components placed and reflowed.](/media/frogsboro_top_reflowed.jpg "FROGSBORO top after reflow")
+{{< figure src="frogsboro_top_reflowed.jpg" caption="Top after reflow" alt="The board (top view) with all of the top components placed and reflowed." >}}
 
 ... and then reflow with the preheater around "300&deg;C"[^3] and very low flow rate hot air at 350&deg;C.
 
-![The board (top view) with all of the top components placed and reflowed.](/media/frogsboro_bottom_reflowed.jpg "FROGSBORO bottom after reflow")
+{{< figure src="frogsboro_bottom_reflowed.jpg" caption="Bottom after reflow" alt="The board (bottom view) with all of the bottom components placed and reflowed." >}}
 
 For the bottom side, I keep the preheater lower ("100&deg;C") and use the same hot air settings. Through hole parts are the final step. They need thermal relief as I don't have the board preheated when soldering these.
 

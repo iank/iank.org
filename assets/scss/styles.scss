@@ -1,0 +1,23 @@
+figure.image {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    max-width: 100%;
+    margin-top: 10px; // adjust as needed
+    font-size: 0.8em; // adjust as needed
+
+    strong {
+      // you can add styling specifically for the title here
+    }
+  }
+}
+
