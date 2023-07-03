@@ -2,13 +2,10 @@
 template: post
 title: A Custom i.MX6ULL Board
 slug: catfood-custom-imx6ull-board
-featured_image: /media/catfood_layout.png
+featured_image: catfood_header.png
 draft: false
 date: 2021-12-28T02:25:16.649Z
-description: As a vehicle for learning OrCAD, I built a custom embedded Linux
-  board using NXP's i.MX6ULL processor. The board, called CATFOOD, has the
-  i.MX6, DDR3, NAND flash, an Ethernet PHY, and an SD card. It presents a serial
-  console over the USB-C connector, which also supplies power.
+description: A custom embedded Linux board using NXP's i.MX6ULL processor.
 category: Hardware
 tags:
   - Hardware
@@ -17,11 +14,11 @@ tags:
 ---
 As a vehicle for learning OrCAD, I built a custom embedded Linux board using NXP's i.MX6ULL processor. The board is called CATFOOD (I was more excited to get started than I was to come up with a name). It has the i.MX6, DDR3, NAND flash, an Ethernet PHY, and an SD card. It presents a serial console over the USB-C connector, which also supplies power.
 
-![CATFOOD layout screenshot](/media/catfood_layout.png "CATFOOD layout screenshot")
+{{< figure src="catfood_layout.png" caption="Layout" alt="CATFOOD layout screenshot" >}}
 
 This was my first embedded Linux design, as well as my first design incorporating DDR or Ethernet. The design is heavily based on NXP's reference implementation. I also used Seeed Studio's i.MX6 module as a reference (it is itself a stripped-down version of the NXP design).
 
-![A half-populated PCB.](/media/catfood_paste.jpg "Half-populated CATFOOD")
+{{< figure src="catfood_paste.jpg" caption="A half-populated PCB." alt="Half-populated CATFOOD" >}}
 
 I had the 4-layer board and a stencil manufactured using a low-cost PCB prototyping service and assembled it at home.
 
@@ -31,7 +28,7 @@ I had the 4-layer board and a stencil manufactured using a low-cost PCB prototyp
 
 There was at first an issue booting. I traced this down to a problem with the DDR by interrogating the device over the built-in USB bootloader. See <https://github.com/boundarydevices/imx_usb_loader> as well as NXP's DDR calibration tool. After checking the DDR voltage reference and a few clock termination passives I reflowed the memory chip, which solved the issue. If I had to guess (and I do, because I don't have an X-ray machine), I didn't get enough heat on that part the first time I reflowed it.
 
-![Assembled PCB](/media/catfood_assembled.jpg "Assembled PCB")
+{{< figure src="catfood_assembled.jpg" caption="Assembled PCB" alt="Assembled PCB" >}}
 
 ### Ethernet
 
@@ -49,7 +46,7 @@ fuse prog 4 3 0xf607
 fuse prog 4 2 0x37f1ec7a
 ```
 
-![Photo of a monitor with a running CATFOOD in the foreground. The monitor shows a working ping to iank.org](/media/catfood_ping.jpg "Working Ethernet")
+{{< figure src="catfood_ping.jpg" alt="Photo of a monitor with a running CATFOOD in the foreground. The monitor shows a working ping to iank.org" caption="Working Ethernet" >}}
 
 ## Lessons Learned
 

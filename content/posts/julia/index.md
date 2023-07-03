@@ -20,17 +20,17 @@ Check out [Malin Christersson's julia set visualizations here](http://www.malinc
 
 All of the design files can be found on github at <https://github.com/iank/julia_lcd>.
 
-![Julia finished assembly](/media/julia_finished.jpg "Julia finished assembly")
+{{< figure src="/media/julia_finished.jpg" caption="Julia finished assembly" alt="Julia finished assembly" >}}
 
-![Julia example image](/media/julia_example.jpg "Julia example image")
+{{< figure src="/media/julia_example.jpg" caption="Julia example image" alt="Julia example image" >}}
 
 ## Hardware
 
 The final evolution of the hardware is a Cyclone IV FPGA, an external SDRAM, and a Silicon Labs EFM8 microcontroller used to configure the FPGA from a SPI flash. The LCD module contains a capacitive touch controller, broken out on the second, smaller, flex cable.
 
-![Julia PCB layout screenshot](/media/julia_v2.1.1.0-Board.png "Julia PCB layout")
+{{< figure src="/media/julia_v2.1.1.0-Board.png" caption="Julia PCB layout screenshot" alt="Julia PCB layout" >}}
 
-![Julia 3D render](/media/julia_v2.1.1.0_3DTop.png "Julia 3D render")
+{{< figure src="/media/julia_v2.1.1.0_3DTop.png" caption="Julia 3D render" alt="Julia 3D render" >}}
 
 ## Verilog
 
@@ -40,7 +40,7 @@ An i2c master is also implemented. This controls the touch screen. Upon receipt 
 
 ## Lessons learned
 
-![Julia debugging](/media/julia_debugging.jpg "Julia debugging")
+{{< figure src="/media/julia_debugging.jpg" caption="Julia debugging" alt="Julia debugging" >}}
 
 I'd never used an FPGA before this project, aside from some trivial examples in school. I spent a lot of time iterating on the Verilog here, and I learned a lot about what I could and could not do (as well as the memory bandwidth / LUTs I'd need to do it). This was also the first time I assembled a BGA part at home.
 
