@@ -13,7 +13,7 @@ tags:
   - linux
   - sam9x60
 ---
-Another custom embedded Linux board. I recently did a free evaluation of Altium Designer and built this as a way to try it out. The design is based on the SAM9X60 SiP and has a USB device port, two USB host ports, a microSD card, and a low profile 40-pin expansion connector (following the Raspberry Pi pinout) which breaks out GPIOs and various other peripherals. It's called FROGSBORO, which I guess is a moderate improvement over [CATFOOD](https://iank.org/posts/catfood-custom-imx6ull-board).
+Another custom embedded Linux board. I recently did a free evaluation of Altium Designer and built this as a way to try it out. The design is based on the SAM9X60 SiP and has a USB device port, two USB host ports, a microSD card, and a low profile 40-pin expansion connector (following the Raspberry Pi pinout) which breaks out GPIOs and various other peripherals. It's called FROGSBORO, which I guess is a moderate improvement over [CATFOOD](/posts/catfood-custom-imx6ull-board).
 
 Design files: [Schematic (pdf)](/media/frogsboro_schematic_v1.0.2.pdf), [BOM (pdf)](/media/frogsboro_bom_v1.0.2.pdf), [Gerbers (zip)](/media/frogsboro_gbr_v1.0.2.zip)
 
