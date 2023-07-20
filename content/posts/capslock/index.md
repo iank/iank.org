@@ -27,7 +27,7 @@ I processed R.'s disappearance in my own way by writing a robot to replace him. 
 
 It was a simple Perl script, one hundred lines at most, and eventually I generalized it to repeat things that anyone had shouted in the presence of the robot. Anything shouted in all caps would be met with a random all-caps reply.
 
-I started a [twitter account for the robot](https://twitter.com/LOUDBOT). Anyone on IRC could tell LOUDBOT to tweet the last thing it shouted. It [got into fights](/media/loudbot_capscop.png) with other twitter bots[^1]. It [#engaged](/media/loudbot_intel.png) with [#brands](/media/loudbot_twc.png). While never particularly popular (it hovers at about 900 followers), it grew beyond my tiny corner of the internet. I had a surreal moment when I met someone in "real life" who followed LOUDBOT on twitter before she knew me.
+I started a [twitter account for the robot](https://twitter.com/LOUDBOT). Anyone on IRC could tell LOUDBOT to tweet the last thing it shouted. It [got into fights](loudbot_capscop.png) with other twitter bots[^1]. It [#engaged](loudbot_intel.png) with [#brands](loudbot_twc.png). While never particularly popular (it hovers at about 900 followers), it grew beyond my tiny corner of the internet. I had a surreal moment when I met someone in "real life" who followed LOUDBOT on twitter before she knew me.
 
 The Perl script was written and re-written, overengineered, factored, and re-overengineered. It was a vehicle for me to play with NoSQL at the height of that movement (some versions were [web-scale](https://www.youtube.com/watch?v=b2F-DItXtZs)). It's integrated with my distributed swarm of self-managing IRC robots. Now it's over 1500 lines of asynchronous message-passing highly-available [OTP](http://www.erlang.org/doc/design_principles/users_guide.html) Erlang and Perl. I've forgotten everything there is to know about the code, but the nature of Erlang is that the thing has kept running for the last two years with no real maintenance or input from me. I call it "telecom-scale."
 
@@ -59,7 +59,7 @@ Over time, people grew accustomed to LOUDBOT's presence and the nature of their 
 
 Our relationships with robots and systems, like people, are temporary. Trying to hang on to the way things were at the height of a friendship is impossible at best. It's been fun, but this system is stagnant, we've grown apart, and we're on to the getting-together-for-an-awkward-lunch-once-a-year phase of this friendship.
 
-LOUDBOT isn't my [*Creep*](http://en.wikipedia.org/wiki/Creep_%28Radiohead_song%29), but it's time to shut it off. I'll always have this ridiculous [word cloud](/media/loudbot_wordcloud.png), which is vulgar and awful and I might frame it and put it up on my wall. Thanks, Internet.
+LOUDBOT isn't my [*Creep*](http://en.wikipedia.org/wiki/Creep_%28Radiohead_song%29), but it's time to shut it off. I'll always have this ridiculous [word cloud](loudbot_wordcloud.png). Thanks, Internet.
 
 > -!- Nate has joined ##church-of-loudbot  
 >  < Nate> wow it really exists...  
