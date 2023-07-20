@@ -14,6 +14,8 @@ tags:
   - hardware
   - PCB
 ---
+A custom Cyclone IV board interfaces with TFT LCD panel, capacitive touch controller, SDR SDRAM. The FPGA superimposes a Julia set on the Mandelbrot set. Touching the screen chooses the set point z0.
+
 Check out [Malin Christersson's julia set visualizations here](http://www.malinc.se/m/JuliaSets.php). This is basically an implementation of the first demo on that page. One thing that should be clear is that there's no need for an FPGA to do this; it's in fact exactly the wrong approach. This project was a solution in search of a problem: I started with a Cyclone II and an LCD with no application in mind and it evolved from there. I got to use it as a vehicle to learn about FPGAs, verilog, and push my PCB layout and assembly capabilities.
 
 All of the design files can be found on github at <https://github.com/iank/julia_lcd>.

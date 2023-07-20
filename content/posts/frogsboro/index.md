@@ -5,7 +5,7 @@ slug: frogsboro-embedded-linux-board-sam9x60-sip
 featured_image: frogsboro_hdr.jpg
 draft: false
 date: 2022-01-08T04:44:49.895Z
-description: A custom embedded Linux board based on the SAM9X60 SiP.
+description: Another custom embedded Linux board. I recently did a free evaluation of Altium Designer and built this as a way to try it out. The design is based on the SAM9X60 SiP and has a USB device port, two USB host ports, a microSD card, and a low profile 40-pin expansion connector which breaks out GPIOs and peripherals.
 category: Hardware
 tags:
   - hardware

@@ -5,7 +5,7 @@ slug: catfood-custom-imx6ull-board
 featured_image: catfood_header.png
 draft: false
 date: 2021-12-28T02:25:16.649Z
-description: A custom embedded Linux board using NXP's i.MX6ULL processor.
+description: As a vehicle for learning OrCAD, I built a custom embedded Linux board using NXP's i.MX6ULL processor. The board, called CATFOOD, has the i.MX6, DDR3, NAND flash, an Ethernet PHY, and an SD card. It presents a serial console over the USB-C connector, which also supplies power.
 category: Hardware
 tags:
   - Hardware
