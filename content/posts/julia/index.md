@@ -40,7 +40,7 @@ An i2c master is also implemented. This controls the touch screen. Upon receipt 
 
 {{< figure src="julia_debugging.jpg" alt="A picture of the board with a debug board attached to an altera programmer. There's also a USB logic analyzer connected to some hands-free probes, which are probing the touchscreen connector." >}}
 
-I'd never used an FPGA before this project, aside from some trivial examples in school. I spent a lot of time iterating on the Verilog here, and I learned a lot about what I could and could not do (as well as the memory bandwidth / LUTs I'd need to do it). This was also the first time I assembled a BGA part at home.
+I'd never used an FPGA before this project. I spent a lot of time iterating on the Verilog here, and I learned a lot about what I could and could not do (as well as the memory bandwidth / LUTs I'd need to do it). This was also the first time I assembled a BGA part at home.
 
 Using a separate debug/programming board was handy. In one spin I had tried using a board-to-board connector for this, which turned out to not be tenable without mechanical support. The IPC cable pictured above was easier to assemble and didn't really take up more space.
 
