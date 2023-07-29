@@ -6,3 +6,8 @@ theme = 'diary'
 
 [params]
 imageMaxWidth = 600
+
+[[menu.main]]
+url = "/about"
+name = "About"
+weight = 3
