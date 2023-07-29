@@ -13,6 +13,8 @@ tags:
   - PCB
   - hardware
   - entropy
+aliases:
+  - /trng.html
 ---
 This page describes the implementation of (Yet Another) avalanche noise hardware random number generator. This is a device which has been implemented many times [e.g. [Rob Seward](http://robseward.com/itp/adv_tech/random_generator/), [Aaron Logue](http://www.cryogenius.com/hardware/isarng/)], including some commercial offerings [e.g. [Entropy Key](http://www.entropykey.co.uk/), [TrueRNG](http://ubld.it/products/truerng-hardware-random-number-generator/)]. This project does not do anything better than existing work, but I learned a lot.
 
