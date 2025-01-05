@@ -150,7 +150,7 @@ I understand that triaging reports of security vulnerabilities is time-consuming
 
 **01/05/2025**:
 
-At the time of this update there is no official fix. I patched my clock to use an MQTT broker on my network, and my notes on this can be found here: [https://github.com/iank/alarmclock_firmware.git](https://github.com/iank/alarmclock_firmware.git).
+At the time of this update there is no official fix. I patched my clock to use an MQTT broker on my network, and my notes on this can be found here: [https://github.com/iank/alarmclock-firmware](https://github.com/iank/alarmclock-firmware).
 
 This also gets me Home Assistant integration, which was my original goal..
 
