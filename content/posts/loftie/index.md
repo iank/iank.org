@@ -5,7 +5,7 @@ slug: loftie-rce
 featured_image: loftie_hdr.png
 draft: false
 date: 2024-12-13T23:44:53
-lastmod: 2024-12-26T00:57:02
+lastmod: 2025-01-05T07:43:02
 description: While looking for an API to use with Home Assistant, I found a remote code execution vulnerability in a popular WiFi-connected alarm clock.
 category: security
 tags:
@@ -145,6 +145,14 @@ In case it seemed like I was asking a question I tried to be very clear on 12/16
 As of 12/26/2024 I have not received a response.
 
 I understand that triaging reports of security vulnerabilities is time-consuming and paying people a living wage to engage with and escalate messages from customers can be expensive. However, choosing not to do these things is a business decision. From my persective: I've reached out over the only channel available to me, the company was unreceptive, and I've been left to choose between public disclosure or letting this sit until someone else discovers it.
+
+# Update: Mitigation
+
+**01/05/2025**:
+
+At the time of this update there is no official fix. I patched my clock to use an MQTT broker on my network, and my notes on this can be found here: [https://github.com/iank/alarmclock_firmware.git](https://github.com/iank/alarmclock_firmware.git).
+
+This also gets me Home Assistant integration, which was my original goal..
 
 [^1]: Note from the future: it's a 5-pin Molex Picoblade, accessible by removing the bottom cover. IO0, EN, TXD0, RXD0, GND.
 [^2]: Between the first draft of this article and publication a new firmware, version `0007_1.6.0` has been released but it does not patch the vulnerability.
